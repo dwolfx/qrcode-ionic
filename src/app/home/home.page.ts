@@ -19,7 +19,9 @@ export class HomePage {
 
   loadingQr: HTMLIonLoadingElement;
 
-  constructor(private toastCtrl: ToastController, private loadingCtrl: LoadingController) {}
+  constructor(
+    private toastCtrl: ToastController, 
+    private loadingCtrl: LoadingController) {}
 
   ngAfterViewInit() {
     this.videoElement = this.video.nativeElement;
@@ -32,13 +34,22 @@ export class HomePage {
       video: {facingMode: 'environment'}
     })
     this.videoElement.srcObject = stream;
+    this.videoElement.src = URL.createObjectURL(stream);
     this.videoElement.setAttribute('playinline', true);
     this.videoElement.play();
+
 
     this.loadingQr = await this.loadingCtrl.create({})
     await this.loadingQr.present();
 
     requestAnimationFrame(this.scan.bind(this));
+  }
+
+  stopScan() {
+    this.scanActive = false;
+  }
+  reset() {
+    this.scanResult = null;
   }
 
   async scan() {
@@ -85,12 +96,8 @@ export class HomePage {
     }
   }
 
-  stopScan() {
-    this.scanActive = false;
-  }
-  reset() {
-    this.scanResult = null;
-  }
+  
+  
 
   async showQrToast(){
     const toast = await this.toastCtrl.create({
