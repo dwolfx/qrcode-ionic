@@ -1,17 +1,17 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { LoadingController, ToastController } from '@ionic/angular';
-import jsQR from 'jsqr';
+import { Component, ElementRef, ViewChild } from "@angular/core";
+import { LoadingController, ToastController } from "@ionic/angular";
+import jsQR from "jsqr";
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: "app-home",
+  templateUrl: "home.page.html",
+  styleUrls: ["home.page.scss"],
 })
 export class HomePage {
   scanActive = false;
   scanResult = null;
-  @ViewChild('video', { static: false }) video : ElementRef;
-  @ViewChild('canvas', { static: false }) canvas : ElementRef;
+  @ViewChild("video", { static: false }) video: ElementRef;
+  @ViewChild("canvas", { static: false }) canvas: ElementRef;
 
   videoElement: any;
   canvasElement: any;
@@ -20,31 +20,27 @@ export class HomePage {
   loadingQr: HTMLIonLoadingElement;
 
   constructor(
-    private toastCtrl: ToastController, 
-    private loadingCtrl: LoadingController) {}
+    private toastCtrl: ToastController,
+    private loadingCtrl: LoadingController
+  ) {}
 
   ngAfterViewInit() {
     this.videoElement = this.video.nativeElement;
     this.canvasElement = this.canvas.nativeElement;
-    this.canvasContext = this.canvasElement.getContext('2d');
+    this.canvasContext = this.canvasElement.getContext("2d");
   }
 
   async startScan() {
-    const stream = navigator.mediaDevices.getUserMedia({
-      video: {facingMode: 'environment'}
-    })
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+    });
     this.videoElement.srcObject = stream;
-    this.videoElement.src = URL.createObjectURL(stream);
-    this.videoElement.setAttribute('playinline', true);
+    this.videoElement.setAttribute("playinline", true);
     this.videoElement.play();
-
-
-    this.loadingQr = await this.loadingCtrl.create({})
+    this.loadingQr = await this.loadingCtrl.create({});
     await this.loadingQr.present();
-
     requestAnimationFrame(this.scan.bind(this));
   }
-
   stopScan() {
     this.scanActive = false;
   }
@@ -78,39 +74,34 @@ export class HomePage {
       );
 
       const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: 'dontInvert'
+        inversionAttempts: "dontInvert",
       });
       if (code) {
         this.scanActive = false;
         this.scanResult = code.data;
         this.showQrToast();
       } else {
-        if(this.scanActive){
+        if (this.scanActive) {
           requestAnimationFrame(this.scan.bind(this));
         }
       }
-
-
     } else {
       requestAnimationFrame(this.scan.bind(this));
     }
   }
 
-  
-  
-
-  async showQrToast(){
+  async showQrToast() {
     const toast = await this.toastCtrl.create({
       message: `Open ${this.scanResult}?`,
-      position: 'top',
+      position: "top",
       buttons: [
         {
-          text: 'Open',
+          text: "Open",
           handler: () => {
-            window.open(this.scanResult, '_system', 'location=yes');
-          }
-        }
-      ]
+            window.open(this.scanResult, "_system", "location=yes");
+          },
+        },
+      ],
     });
     toast.present();
   }
